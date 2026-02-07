@@ -66,6 +66,8 @@ THIRD_PARTY_APPS = [
 # Local Apps (add your apps here)
 LOCAL_APPS = [
     'base',  # Required for management commands
+    'apps.authentication',  # Authentication system
+    'apps.email_service',  # Email service
 ]
 
 INSTALLED_APPS = UNFOLD_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -286,6 +288,22 @@ EMAIL_HOST_PASSWORD = ''
 DEFAULT_FROM_EMAIL = 'noreply@example.com'
 SERVER_EMAIL = 'server@example.com'
 
+# Email Service Configuration
+EMAIL_ENABLED = os.getenv('EMAIL_ENABLED', 'True').lower() in ['true', '1', 'yes']  # Global email enable/disable
+EMAIL_PROVIDER = os.getenv('EMAIL_PROVIDER', 'smtp')  # 'sendgrid', 'resend', or 'smtp'
+EMAIL_PROVIDER_API_KEY = os.getenv('EMAIL_PROVIDER_API_KEY', '')
+DEFAULT_FROM_NAME = os.getenv('DEFAULT_FROM_NAME', 'Django App')
+
+# Email Template Source Configuration
+# Set to 'db' to use database templates first (fallback to static)
+# Set to 'static' to only use static template files
+# Set to 'db_only' to only use database templates (no fallback)
+USE_DB_EMAIL_TEMPLATES = os.getenv('USE_DB_EMAIL_TEMPLATES', 'db')  # 'db', 'static', or 'db_only'
+
+# Frontend Configuration (for email links)
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+SITE_NAME = os.getenv('SITE_NAME', 'Django App')
+
 # =============================================================================
 # LOGGING CONFIGURATION
 # =============================================================================
@@ -360,6 +378,8 @@ CSRF_USE_SESSIONS = False
 # =============================================================================
 # AUTHENTICATION
 # =============================================================================
+
+AUTH_USER_MODEL = 'authentication.User'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'

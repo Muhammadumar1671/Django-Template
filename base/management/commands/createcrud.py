@@ -3,15 +3,17 @@ Django management command to auto-generate CRUD APIs for models.
 
 Usage:
     python manage.py createcrud <app_name> <models_file>
-    
+
 Example:
     python manage.py createcrud products apps/products/models.py
-    
+
 This will:
 1. Scan the models file for all Django models
-2. Generate serializers, viewsets, services, and URLs
+2. Generate class-based views (ModelViewSet), serializers, services, and URLs
 3. Automatically add app to INSTALLED_APPS
 4. Automatically add URLs to main urls.py
+
+Note: All generated views use class-based structure (ViewSets) for consistency.
 """
 
 import os
