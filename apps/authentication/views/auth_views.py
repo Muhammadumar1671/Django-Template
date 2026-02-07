@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from apps.authentication.serializers import (
     RegisterSerializer,
@@ -17,12 +18,12 @@ from apps.authentication.serializers import (
     VerifyEmailSerializer,
 )
 from apps.authentication.services import AuthService
-from apps.email_service.services import EmailService
+from apps.authentication.ratelimit import RateLimitMixin
 
 User = get_user_model()
 
 
-class RegisterView(APIView):
+class RegisterView(RateLimitMixin, APIView):
     """
     Register a new user.
 
@@ -36,6 +37,9 @@ class RegisterView(APIView):
     }
     """
     permission_classes = [AllowAny]
+    ratelimit_key = 'ip'
+    ratelimit_rate = '3/h'
+    ratelimit_method = 'POST'
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -48,8 +52,15 @@ class RegisterView(APIView):
                 last_name=serializer.validated_data.get('last_name', '')
             )
 
-            # Send verification email
-            EmailService.send_verification_email(user, verification_token.token)
+            # Send verification email asynchronously
+            if getattr(settings, 'CELERY_TASK_ALWAYS_EAGER', False):
+                # In development/test mode, send synchronously
+                from apps.email_service.services import EmailService
+                EmailService.send_verification_email(user, verification_token.token)
+            else:
+                # In production, send asynchronously via Celery
+                from apps.email_service.tasks import send_verification_email_task
+                send_verification_email_task.delay(user.id, verification_token.token)
 
             return Response({
                 'message': 'Registration successful. Please check your email to verify your account.',
@@ -59,7 +70,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginView(APIView):
+class LoginView(RateLimitMixin, APIView):
     """
     Login user and return JWT tokens.
 
@@ -70,6 +81,9 @@ class LoginView(APIView):
     }
     """
     permission_classes = [AllowAny]
+    ratelimit_key = 'ip'
+    ratelimit_rate = '5/m'
+    ratelimit_method = 'POST'
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -163,7 +177,7 @@ class ChangePasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ForgotPasswordView(APIView):
+class ForgotPasswordView(RateLimitMixin, APIView):
     """
     Request password reset.
 
@@ -173,6 +187,9 @@ class ForgotPasswordView(APIView):
     }
     """
     permission_classes = [AllowAny]
+    ratelimit_key = 'email'
+    ratelimit_rate = '3/h'
+    ratelimit_method = 'POST'
 
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -182,8 +199,15 @@ class ForgotPasswordView(APIView):
             reset_token = AuthService.create_password_reset_token(email)
 
             if reset_token:
-                # Send password reset email
-                EmailService.send_password_reset_email(reset_token.user, reset_token.token)
+                # Send password reset email asynchronously
+                if getattr(settings, 'CELERY_TASK_ALWAYS_EAGER', False):
+                    # In development/test mode, send synchronously
+                    from apps.email_service.services import EmailService
+                    EmailService.send_password_reset_email(reset_token.user, reset_token.token)
+                else:
+                    # In production, send asynchronously via Celery
+                    from apps.email_service.tasks import send_password_reset_email_task
+                    send_password_reset_email_task.delay(reset_token.user.id, reset_token.token)
 
             # Always return success to prevent email enumeration
             return Response({
@@ -193,7 +217,7 @@ class ForgotPasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ResetPasswordView(APIView):
+class ResetPasswordView(RateLimitMixin, APIView):
     """
     Reset password with token.
 
@@ -205,6 +229,9 @@ class ResetPasswordView(APIView):
     }
     """
     permission_classes = [AllowAny]
+    ratelimit_key = 'ip'
+    ratelimit_rate = '5/h'
+    ratelimit_method = 'POST'
 
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
@@ -223,7 +250,7 @@ class ResetPasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class VerifyEmailView(APIView):
+class VerifyEmailView(RateLimitMixin, APIView):
     """
     Verify email with token.
 
@@ -233,6 +260,9 @@ class VerifyEmailView(APIView):
     }
     """
     permission_classes = [AllowAny]
+    ratelimit_key = 'ip'
+    ratelimit_rate = '10/h'
+    ratelimit_method = 'POST'
 
     def post(self, request):
         serializer = VerifyEmailSerializer(data=request.data)
@@ -250,13 +280,16 @@ class VerifyEmailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ResendVerificationView(APIView):
+class ResendVerificationView(RateLimitMixin, APIView):
     """
     Resend email verification.
 
     POST /api/auth/resend-verification/
     """
     permission_classes = [IsAuthenticated]
+    ratelimit_key = 'user'
+    ratelimit_rate = '3/h'
+    ratelimit_method = 'POST'
 
     def post(self, request):
         user = request.user
@@ -267,7 +300,16 @@ class ResendVerificationView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         verification_token = AuthService.create_verification_token(user)
-        EmailService.send_verification_email(user, verification_token.token)
+
+        # Send verification email asynchronously
+        if getattr(settings, 'CELERY_TASK_ALWAYS_EAGER', False):
+            # In development/test mode, send synchronously
+            from apps.email_service.services import EmailService
+            EmailService.send_verification_email(user, verification_token.token)
+        else:
+            # In production, send asynchronously via Celery
+            from apps.email_service.tasks import send_verification_email_task
+            send_verification_email_task.delay(user.id, verification_token.token)
 
         return Response({
             'message': 'Verification email sent'

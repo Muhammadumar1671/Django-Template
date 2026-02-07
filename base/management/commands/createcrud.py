@@ -198,12 +198,21 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.{app_name}.models import {model_name}
 from apps.{app_name}.serializers import {model_name}Serializer
 from apps.{app_name}.services.{model_name.lower()}_service import {model_name}Service
+from base.throttles import DynamicThrottleMixin
 
 
-class {model_name}ViewSet(viewsets.ModelViewSet):
+class {model_name}ViewSet(DynamicThrottleMixin, viewsets.ModelViewSet):
     """
     ViewSet for {model_name} with full CRUD operations.
-    
+
+    Rate Limiting:
+    - Read operations (GET): 100/minute
+    - Write operations (POST/PUT/PATCH): 50/minute
+    - Create operations (POST): 30/minute
+    - Delete operations (DELETE): 20/minute
+    - Burst protection: 10/second
+    - Daily limit: 1000/day
+
     Endpoints:
     - GET    /api/{app_name}/{model_name.lower()}s/     - List all
     - POST   /api/{app_name}/{model_name.lower()}s/     - Create new
@@ -216,25 +225,28 @@ class {model_name}ViewSet(viewsets.ModelViewSet):
     serializer_class = {model_name}Serializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    
+
+    # Rate limiting is automatically applied via DynamicThrottleMixin
+    # To customize, override get_throttles() or set throttle_classes directly
+
     # Uncomment and customize as needed:
     # filterset_fields = ['field1', 'field2']
     # search_fields = ['field1', 'field2']
     # ordering_fields = ['created_at', 'updated_at']
     # ordering = ['-created_at']
-    
+
     def get_queryset(self):
         """Override to add custom filtering."""
         return {model_name}Service.get_all()
-    
+
     def perform_create(self, serializer):
         """Use service layer for creation."""
         {model_name}Service.create(serializer.validated_data)
-    
+
     def perform_update(self, serializer):
         """Use service layer for updates."""
         {model_name}Service.update(serializer.instance, serializer.validated_data)
-    
+
     def perform_destroy(self, instance):
         """Use service layer for deletion."""
         {model_name}Service.delete(instance)

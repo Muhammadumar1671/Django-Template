@@ -162,6 +162,13 @@ UNFOLD["SITE_URL"] = os.getenv('UNFOLD_SITE_URL', 'http://localhost:8000')
 # =============================================================================
 
 # Use eager mode for development (tasks run synchronously, no Celery worker needed)
-# Uncomment to enable:
-# CELERY_TASK_ALWAYS_EAGER = True
-# CELERY_TASK_EAGER_PROPAGATES = True
+# This makes emails send immediately without requiring a Celery worker
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+
+# =============================================================================
+# RATE LIMITING - Development Settings
+# =============================================================================
+
+# Rate limiting is enabled by default. To disable for development:
+# RATELIMIT_ENABLE = False

@@ -197,6 +197,14 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/hour',
         'user': '1000/hour',
+        # CRUD-specific throttle rates
+        'crud_read': '100/minute',
+        'crud_write': '50/minute',
+        'crud_create': '30/minute',
+        'crud_delete': '20/minute',
+        'crud_anon': '20/hour',
+        'burst': '10/second',
+        'sustained': '1000/day',
     },
 }
 
