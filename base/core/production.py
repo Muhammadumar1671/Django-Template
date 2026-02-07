@@ -190,7 +190,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes soft limit
 # =============================================================================
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR.parent, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # =============================================================================
@@ -261,7 +261,7 @@ LOGGING = {
         'file': {
             'level': 'WARNING',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.getenv('LOG_FILE_PATH', os.path.join(BASE_DIR.parent, 'logs', 'production.log')),
+            'filename': os.getenv('LOG_FILE_PATH', os.path.join(BASE_DIR, 'logs', 'production.log')),
             'maxBytes': 1024 * 1024 * 50,  # 50MB
             'backupCount': 10,
             'formatter': 'verbose',
@@ -269,7 +269,7 @@ LOGGING = {
         'error_file': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.getenv('ERROR_LOG_FILE_PATH', os.path.join(BASE_DIR.parent, 'logs', 'error.log')),
+            'filename': os.getenv('ERROR_LOG_FILE_PATH', os.path.join(BASE_DIR, 'logs', 'error.log')),
             'maxBytes': 1024 * 1024 * 50,  # 50MB
             'backupCount': 10,
             'formatter': 'verbose',
@@ -310,7 +310,7 @@ LOGGING = {
 }
 
 # Create logs directory if it doesn't exist
-LOGS_DIR = os.path.join(BASE_DIR.parent, 'logs')
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 # =============================================================================

@@ -14,10 +14,11 @@ from datetime import timedelta
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# This points to the project root (django-plugin/)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Add apps directory to Python path
-sys.path.insert(0, str(BASE_DIR.parent / 'apps'))
+sys.path.insert(0, str(BASE_DIR / 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -167,12 +168,12 @@ USE_TZ = True
 # =============================================================================
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = []
 
 # Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR.parent / 'media'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -290,7 +291,7 @@ SERVER_EMAIL = 'server@example.com'
 # =============================================================================
 
 # Ensure logs directory exists
-LOGS_DIR = BASE_DIR.parent / 'logs'
+LOGS_DIR = BASE_DIR / 'logs'
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
 LOGGING = {
@@ -323,7 +324,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR.parent / 'logs' / 'django.log',
+            'filename': BASE_DIR / 'logs' / 'django.log',
             'maxBytes': 1024 * 1024 * 15,  # 15MB
             'backupCount': 10,
             'formatter': 'verbose',
