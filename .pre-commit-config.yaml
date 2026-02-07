@@ -1,0 +1,74 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com for more information
+
+repos:
+  # Ruff - Fast Python linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix]
+        types_or: [python, pyi]
+      # Run the formatter
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  # General pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Python-specific
+      - id: check-ast                # Validate Python syntax
+      - id: check-builtin-literals   # Require literal syntax when initializing builtin types
+      - id: check-docstring-first    # Check docstring is first in file
+      - id: debug-statements         # Check for debugger imports and breakpoints
+
+      # General
+      - id: check-added-large-files  # Prevent committing large files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict      # Check for files with names that would conflict on case-insensitive filesystems
+      - id: check-merge-conflict     # Check for merge conflict strings
+      - id: check-json               # Validate JSON files
+      - id: check-toml               # Validate TOML files
+      - id: check-yaml               # Validate YAML files
+        args: ['--unsafe']           # Allow custom tags
+      - id: end-of-file-fixer        # Ensure files end with newline
+      - id: trailing-whitespace      # Remove trailing whitespace
+      - id: mixed-line-ending        # Ensure consistent line endings
+
+  # Django-specific checks
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.22.1
+    hooks:
+      - id: django-upgrade
+        args: [--target-version, "5.1"]
+
+  # Security checks
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+        exclude: ^tests/
+
+  # Sort imports
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--filter-files"]
+
+# Configuration for pre-commit.ci (optional)
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

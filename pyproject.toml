@@ -1,0 +1,94 @@
+[tool.ruff]
+# Ruff configuration
+line-length = 120
+target-version = "py311"
+
+# Exclude directories
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "*/migrations/*",
+    "staticfiles",
+    "media",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# Enable specific rule sets
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "DJ",  # flake8-django
+]
+
+# Ignore specific rules
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+    "DJ001", # avoid using null=True on string-based fields
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Allow unused imports in __init__.py files
+"__init__.py" = ["F401"]
+# Allow print statements in management commands
+"*/management/commands/*" = ["T201"]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "single"
+# Use spaces for indentation
+indent-style = "space"
+# Respect magic trailing comma
+skip-magic-trailing-comma = false
+# Format docstrings
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+# Import sorting configuration
+known-first-party = ["apps", "base"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.bandit]
+# Bandit security linter configuration
+exclude_dirs = ["tests", "*/migrations/*", "venv", ".venv"]
+skips = ["B101", "B601"]  # Skip assert_used and paramiko_calls
+
+[tool.isort]
+# isort configuration (used by pre-commit)
+profile = "black"
+line_length = 120
+skip_glob = ["*/migrations/*", "venv/*", ".venv/*"]
+known_first_party = ["apps", "base"]
+
+[tool.black]
+# Black formatter configuration (backup if using black instead of ruff)
+line-length = 120
+target-version = ['py311']
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | __pycache__
+  | \.eggs
+  | \.tox
+  | migrations
+  | staticfiles
+  | media
+)/
+'''
+
+[tool.pytest.ini_options]
+# Pytest configuration
+DJANGO_SETTINGS_MODULE = "base.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+testpaths = ["tests"]
+addopts = "--reuse-db --nomigrations"

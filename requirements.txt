@@ -11,6 +11,9 @@ djangorestframework
 djangorestframework-simplejwt
 django-filter
 
+# API Documentation
+drf-spectacular    
+
 # Redis & Caching
 django-redis
 redis
@@ -39,6 +42,3 @@ python-dateutil
 # Production Server (optional, uncomment if needed)
 # gunicorn
 # uvicorn
-
-
-django-filter

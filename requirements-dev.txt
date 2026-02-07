@@ -1,0 +1,43 @@
+# Development Dependencies
+# Install with: pip install -r requirements-dev.txt
+
+# Include production requirements
+-r requirements.txt
+
+# Code Quality & Linting
+ruff>=0.7.0                    # Fast Python linter and formatter
+black>=24.0.0                  # Python code formatter (alternative to ruff format)
+isort>=5.13.0                  # Import sorting
+django-upgrade>=1.22.0         # Automatically upgrade Django syntax
+
+# Security
+bandit[toml]>=1.7.10          # Security linter
+
+# Pre-commit
+pre-commit>=3.8.0             # Pre-commit hooks framework
+
+# Testing
+pytest>=8.0.0                 # Testing framework
+pytest-django>=4.9.0          # Pytest Django integration
+pytest-cov>=6.0.0             # Coverage plugin for pytest
+pytest-xdist>=3.6.0           # Run tests in parallel
+factory-boy>=3.3.0            # Test fixtures
+faker>=33.1.0                 # Fake data generation
+
+# Debugging
+django-debug-toolbar>=4.4.0   # Debug toolbar for Django
+ipython>=8.29.0               # Enhanced Python shell
+ipdb>=0.13.13                 # IPython debugger
+
+# Development Tools
+django-extensions>=3.2.3      # Additional Django management commands
+watchdog>=6.0.0               # File system events monitoring
+
+# Type Checking (Optional)
+mypy>=1.13.0                  # Static type checker
+django-stubs>=5.1.1           # Type stubs for Django
+djangorestframework-stubs>=3.15.1  # Type stubs for DRF
+
+# Documentation
+mkdocs>=1.6.0                 # Documentation generator
+mkdocs-material>=9.5.0        # Material theme for MkDocs
