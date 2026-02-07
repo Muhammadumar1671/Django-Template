@@ -9,6 +9,7 @@ dj-database-url
 # REST Framework & Authentication
 djangorestframework
 djangorestframework-simplejwt
+django-filter
 
 # Redis & Caching
 django-redis
@@ -38,3 +39,6 @@ python-dateutil
 # Production Server (optional, uncomment if needed)
 # gunicorn
 # uvicorn
+
+
+django-filter

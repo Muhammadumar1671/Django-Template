@@ -8,12 +8,16 @@ Environment-specific settings are in development.py and production.py
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import sys
 from datetime import timedelta
 
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Add apps directory to Python path
+sys.path.insert(0, str(BASE_DIR.parent / 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -55,10 +59,13 @@ THIRD_PARTY_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'channels',
+    'django_filters',
 ]
 
 # Local Apps (add your apps here)
-LOCAL_APPS = []
+LOCAL_APPS = [
+    'base',  # Required for management commands
+]
 
 INSTALLED_APPS = UNFOLD_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
