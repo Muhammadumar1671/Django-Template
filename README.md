@@ -1,25 +1,47 @@
 # Django Auto-CRUD Template
 
-A powerful Django starter template that **automatically generates complete CRUD APIs** from your models with a single command. Everything is configured automatically - just define your models and run one command!
+A powerful Django starter template that **automatically generates complete CRUD APIs** from your models. Features an **interactive CLI wizard** that guides you through creating apps and models!
 
-## 🚀 Main Feature: One-Command CRUD Generation
+## 🚀 Main Feature: Interactive App Generator
+
+### Method 1: Interactive CLI (Recommended)
 
 ```bash
-python manage.py createcrud products apps/products/models.py
+python manage.py createapp
 ```
 
-**This single command does EVERYTHING:**
-- ✅ Scans your models file and detects all Django models
-- ✅ Generates serializers in `serializers/` folder (one file per model)
-- ✅ Generates viewsets in `views/` folder (one file per model)
-- ✅ Generates services in `services/` folder (one file per model)
-- ✅ Generates `urls.py` with RESTful routing
-- ✅ Generates `admin.py` with Unfold admin interface
-- ✅ Creates `apps.py` configuration
-- ✅ **Automatically adds app to INSTALLED_APPS**
-- ✅ **Automatically adds URLs to main urls.py**
+**This interactive wizard will:**
+- ✅ Ask for your app name
+- ✅ Guide you through creating models with a friendly interface
+- ✅ Let you choose field types interactively
+- ✅ Auto-generate serializers, viewsets, services, URLs, and admin
+- ✅ **Automatically configure INSTALLED_APPS and URLs**
+- ✅ Everything ready in one go!
 
-**That's it! Your API is ready to use.**
+### Method 2: Generate CRUD for Existing App
+
+Already have an app with models? Generate CRUD instantly:
+
+```bash
+python manage.py generatecrud <app_name>
+```
+
+### Method 3: Manual (Advanced)
+
+For full control, use the original command:
+
+```bash
+python manage.py createcrud <app_name> <models_file>
+```
+
+**All methods generate:**
+- ✅ Serializers in `serializers/` folder (one file per model)
+- ✅ ViewSets in `views/` folder (one file per model)
+- ✅ Services in `services/` folder (one file per model)
+- ✅ `urls.py` with RESTful routing
+- ✅ `admin.py` with Unfold admin interface
+- ✅ `apps.py` configuration
+- ✅ **Auto-configured INSTALLED_APPS and URLs**
 
 ---
 
@@ -50,7 +72,43 @@ python manage.py createsuperuser
 python manage.py collectstatic
 ```
 
-### 4. Create Your First CRUD API
+### 4. Create Your First App (Interactive)
+
+```bash
+# Start the interactive wizard
+python manage.py createapp
+
+# The wizard will ask:
+# Enter app name: products
+# Do you want to create models now? [Y/n]: y
+# 
+# Enter model name: Product
+# Add fields...
+#   Field name: name
+#   Field type: 1 (CharField)
+#   Allow null/blank? [y/N]: n
+#   
+#   Field name: price
+#   Field type: 8 (DecimalField)
+#   Allow null/blank? [y/N]: n
+#   
+#   Field name: (press Enter to finish)
+# 
+# Enter model name: (press Enter to finish)
+
+# Run migrations
+python manage.py makemigrations products
+python manage.py migrate
+
+# Start server
+python manage.py runserver
+```
+
+**That's it! Your API is ready at `http://localhost:8000/api/products/`**
+
+### Alternative: Manual Method
+
+If you prefer to write models yourself:
 
 ```bash
 # Create app directory
@@ -75,24 +133,16 @@ class Product(models.Model):
     
     def __str__(self):
         return self.name
-
-class Category(models.Model):
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        db_table = 'categories'
-    
-    def __str__(self):
-        return self.name
 EOF
 
 # Create __init__.py
 touch apps/products/__init__.py
 
-# Generate CRUD APIs (ONE COMMAND!)
-python manage.py createcrud products apps/products/models.py
+# Generate CRUD APIs
+python manage.py generatecrud products
+
+# OR use the full command:
+# python manage.py createcrud products apps/products/models.py
 
 # Run migrations
 python manage.py makemigrations products
