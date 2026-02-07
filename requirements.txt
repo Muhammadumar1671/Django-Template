@@ -1,0 +1,40 @@
+# Django Core
+Django
+python-dotenv
+
+# Database
+psycopg2-binary
+dj-database-url
+
+# REST Framework & Authentication
+djangorestframework
+djangorestframework-simplejwt
+
+# Redis & Caching
+django-redis
+redis
+
+# Celery (Async Task Queue)
+celery
+celery[redis]
+
+# CORS Headers
+django-cors-headers
+
+# Static Files
+whitenoise
+
+# Django Channels (WebSocket support)
+channels
+channels-redis
+
+# Django Unfold (Modern Admin Interface)
+django-unfold
+
+# Utilities
+Pillow
+python-dateutil
+
+# Production Server (optional, uncomment if needed)
+# gunicorn
+# uvicorn
