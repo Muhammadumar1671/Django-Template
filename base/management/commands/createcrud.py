@@ -77,6 +77,7 @@ class Command(BaseCommand):
         self.generate_viewsets(app_dir, app_name, model_classes, overwrite)
         self.generate_services(app_dir, app_name, model_classes, overwrite)
         self.generate_urls(app_dir, app_name, model_classes, overwrite)
+        self.generate_admin(app_dir, app_name, model_classes, overwrite)
         
         # Create apps.py if it doesn't exist
         self.create_apps_config(app_dir, app_name, overwrite)
@@ -348,6 +349,62 @@ urlpatterns = [
 '''
         urls_file.write_text(content)
         self.stdout.write(self.style.SUCCESS(f'✅ Generated: urls.py'))
+
+    def generate_admin(self, app_dir, app_name, model_classes, overwrite):
+        """Generate admin.py with Unfold admin interface."""
+        admin_file = app_dir / 'admin.py'
+
+        if admin_file.exists() and not overwrite:
+            self.stdout.write(self.style.WARNING(f'⚠️  Skipping admin.py'))
+            return
+
+        content = f'''"""Admin configuration for {app_name} app with Unfold interface."""
+
+from django.contrib import admin
+from unfold.admin import ModelAdmin
+from apps.{app_name}.models import (
+'''
+        for model_name in model_classes.keys():
+            content += f'    {model_name},\n'
+        
+        content += ')\n\n'
+
+        # Generate admin class for each model
+        for model_name in model_classes.keys():
+            content += f'''
+@admin.register({model_name})
+class {model_name}Admin(ModelAdmin):
+    """Admin interface for {model_name} model."""
+    
+    # Customize these fields based on your model
+    list_display = ['id', 'created_at']  # Add your model fields here
+    list_filter = ['created_at']
+    search_fields = ['id']  # Add searchable fields here
+    ordering = ['-created_at']
+    
+    # Unfold-specific configurations
+    # list_display_links = ['id']
+    # list_per_page = 25
+    # date_hierarchy = 'created_at'
+    
+    # Customize fieldsets for better organization
+    # fieldsets = (
+    #     ('Basic Information', {{
+    #         'fields': ('field1', 'field2')
+    #     }}),
+    #     ('Timestamps', {{
+    #         'fields': ('created_at', 'updated_at'),
+    #         'classes': ('collapse',)
+    #     }}),
+    # )
+    
+    # Read-only fields
+    # readonly_fields = ['created_at', 'updated_at']
+
+'''
+
+        admin_file.write_text(content)
+        self.stdout.write(self.style.SUCCESS(f'✅ Generated: admin.py'))
 
     def create_apps_config(self, app_dir, app_name, overwrite):
         """Create apps.py configuration file."""
