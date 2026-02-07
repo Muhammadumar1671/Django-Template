@@ -14,6 +14,7 @@ python manage.py createcrud products apps/products/models.py
 - ✅ Generates viewsets in `views/` folder (one file per model)
 - ✅ Generates services in `services/` folder (one file per model)
 - ✅ Generates `urls.py` with RESTful routing
+- ✅ Generates `admin.py` with Unfold admin interface
 - ✅ Creates `apps.py` configuration
 - ✅ **Automatically adds app to INSTALLED_APPS**
 - ✅ **Automatically adds URLs to main urls.py**
@@ -106,7 +107,7 @@ python manage.py runserver
 Your API is now available at:
 - `http://localhost:8000/api/products/products/` - Product CRUD
 - `http://localhost:8000/api/products/categories/` - Category CRUD
-- `http://localhost:8000/admin/` - Admin interface
+- `http://localhost:8000/admin/` - Admin interface (Unfold)
 
 ---
 
@@ -118,6 +119,7 @@ After running `createcrud`, your app will have this structure:
 apps/products/
 ├── __init__.py
 ├── apps.py                    # Auto-generated
+├── admin.py                   # Auto-generated (Unfold admin)
 ├── models.py                  # You create this
 ├── serializers/               # Auto-generated
 │   ├── __init__.py
@@ -204,6 +206,25 @@ router.register(r'categories', CategoryViewSet, basename='category')
 urlpatterns = [
     path('', include(router.urls)),
 ]
+```
+
+### Admin (`admin.py`)
+
+```python
+from django.contrib import admin
+from unfold.admin import ModelAdmin
+from apps.products.models import Product, Category
+
+@admin.register(Product)
+class ProductAdmin(ModelAdmin):
+    """Admin interface for Product model with Unfold."""
+    
+    list_display = ['id', 'name', 'price', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['name', 'description']
+    ordering = ['-created_at']
+    
+    # Customize as needed - see generated file for more options
 ```
 
 ---
