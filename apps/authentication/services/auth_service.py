@@ -3,6 +3,7 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.db import transaction
+from django.conf import settings
 from datetime import timedelta
 import secrets
 from apps.authentication.models import PasswordResetToken, EmailVerificationToken
@@ -16,17 +17,31 @@ class AuthService:
     @staticmethod
     @transaction.atomic
     def register_user(email, password, first_name='', last_name=''):
-        """Register a new user."""
+        """
+        Register a new user.
+
+        If AUTO_VERIFY_USERS is True in settings, the user will be automatically
+        verified without needing to confirm their email.
+        """
+        # Check if auto-verify is enabled
+        auto_verify = getattr(settings, 'AUTO_VERIFY_USERS', False)
+
         user = User.objects.create_user(
             email=email,
             password=password,
             first_name=first_name,
-            last_name=last_name
+            last_name=last_name,
+            is_verified=auto_verify  # Auto-verify if enabled
         )
-        
-        # Create email verification token
+
+        # Create email verification token (even if auto-verified, for record keeping)
         token = AuthService.create_verification_token(user)
-        
+
+        # If auto-verified, mark token as used
+        if auto_verify:
+            token.is_used = True
+            token.save()
+
         return user, token
     
     @staticmethod

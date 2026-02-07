@@ -312,6 +312,10 @@ USE_DB_EMAIL_TEMPLATES = os.getenv('USE_DB_EMAIL_TEMPLATES', 'db')  # 'db', 'sta
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 SITE_NAME = os.getenv('SITE_NAME', 'Django App')
 
+# Authentication Configuration
+AUTO_VERIFY_USERS = os.getenv('AUTO_VERIFY_USERS', 'False').lower() in ['true', '1', 'yes']
+SKIP_VERIFICATION_EMAIL = os.getenv('SKIP_VERIFICATION_EMAIL', 'False').lower() in ['true', '1', 'yes']
+
 # =============================================================================
 # LOGGING CONFIGURATION
 # =============================================================================

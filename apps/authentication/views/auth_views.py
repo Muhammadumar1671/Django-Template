@@ -52,18 +52,31 @@ class RegisterView(RateLimitMixin, APIView):
                 last_name=serializer.validated_data.get('last_name', '')
             )
 
-            # Send verification email asynchronously
-            if getattr(settings, 'CELERY_TASK_ALWAYS_EAGER', False):
-                # In development/test mode, send synchronously
-                from apps.email_service.services import EmailService
-                EmailService.send_verification_email(user, verification_token.token)
+            # Check if we should send verification email
+            skip_email = getattr(settings, 'SKIP_VERIFICATION_EMAIL', False)
+            auto_verified = getattr(settings, 'AUTO_VERIFY_USERS', False)
+
+            if not skip_email and not auto_verified:
+                # Send verification email asynchronously
+                if getattr(settings, 'CELERY_TASK_ALWAYS_EAGER', False):
+                    # In development/test mode, send synchronously
+                    from apps.email_service.services import EmailService
+                    EmailService.send_verification_email(user, verification_token.token)
+                else:
+                    # In production, send asynchronously via Celery
+                    from apps.email_service.tasks import send_verification_email_task
+                    send_verification_email_task.delay(user.id, verification_token.token)
+
+            # Customize message based on whether email was sent
+            if auto_verified:
+                message = 'Registration successful. Your account is ready to use.'
+            elif skip_email:
+                message = 'Registration successful. Email verification is disabled.'
             else:
-                # In production, send asynchronously via Celery
-                from apps.email_service.tasks import send_verification_email_task
-                send_verification_email_task.delay(user.id, verification_token.token)
+                message = 'Registration successful. Please check your email to verify your account.'
 
             return Response({
-                'message': 'Registration successful. Please check your email to verify your account.',
+                'message': message,
                 'user': UserSerializer(user).data
             }, status=status.HTTP_201_CREATED)
 
@@ -297,6 +310,14 @@ class ResendVerificationView(RateLimitMixin, APIView):
         if user.is_verified:
             return Response({
                 'message': 'Email is already verified'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if email sending is disabled
+        skip_email = getattr(settings, 'SKIP_VERIFICATION_EMAIL', False)
+
+        if skip_email:
+            return Response({
+                'message': 'Email verification is disabled. Please contact support.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
         verification_token = AuthService.create_verification_token(user)
