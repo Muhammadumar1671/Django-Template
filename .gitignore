@@ -40,6 +40,11 @@ db.sqlite3-journal
 *.pot
 local_settings.py
 
+# Migrations
+**/migrations/*.py
+**/migrations/__pycache__/
+!**/migrations/__init__.py
+
 # Environment Variables
 .env
 .env.local
